@@ -16,5 +16,5 @@ const VerificationScheme = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const verify = mongoose.model("Verification", VerificationScheme);
+const verify = mongoose.model("verify", VerificationScheme);
 module.exports=verify;

@@ -1,29 +1,50 @@
-const  verify=require("../models/emailVerification");
-const  {hashFunction, hashString}=require("./hashPassword")
+const verify = require("../models/emailVerification");
+const { hashFunction, hashString } = require("./hashPassword");
 const nodemailer = require("nodemailer");
 const uuid4 = require("uuid");
 const dotenv = require("dotenv");
 dotenv.config();
-// const { Authemail, pass, url } = process.env
-// console.log(+" "+);
-// const {Authemail}=process.env.Authemail
-// const {password}=process.env.pass
-let transport = nodemailer.createTransport({
-  service: 'gmail',
-  secure: true,
-  auth: {
-    user: process.env.Authemail,
-    pass: process.env.pass,
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-});
- const sendVerificationEmail = async (user, res) => {
-  const { _id, email, lastname } = user;
+const { google } = require("googleapis");
+// These id's and secrets should come from .env file.
+
+const sendVerificationEmail = async (user, res) => {
+  const CLIENT_ID =
+    "354978777863-fgn43l53tdesmpkuf4603jjuise8dda3.apps.googleusercontent.com";
+  const CLIENT_SECRET = "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";
+  const REFRESH_TOKEN =
+    "1//04xKpAZ2nssDXCgYIARAAGAQSNwF-L9Ir6GgjZCrcqNcoMZjmRaHkovN1_gbMmzqGLoN6RjdCZ93gPWEaAhdw2tg7Ulu8Mgoq8vU";
+  const REDIRECT_URI = "https://developers.google.com/oauthplayground";
+  const oAuth2Client = new google.auth.OAuth2(
+    CLIENT_ID,
+    CLIENT_SECRET,
+    REDIRECT_URI
+  );
+  oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+  const accessToken = await oAuth2Client.getAccessToken();
+  // console.log(accessToken);
+  const transport = nodemailer.createTransport({
+    service: "gmail",
+    port: 465,
+    secure: true,
+    auth: {
+      type: "OAuth2",
+      user: process.env.Authemail,
+      clientId: CLIENT_ID,
+      clientSecret: CLIENT_SECRET,
+      refreshToken: REFRESH_TOKEN,
+      accessToken: accessToken,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+  // console.log(user);
+  console.log("aadisgh");
+  const { _id, email, firstname } = user;
   // console.log(_id+" "+email);
   const token = _id + uuid4;
   // console.log(token);
+  const link="https://google.com"
   // const link = url + "users/verify" + _id + "/" + token;
   const mailOptions = {
     from: process.env.Authemail,
@@ -116,8 +137,7 @@ let transport = nodemailer.createTransport({
                 opacity: 0;
               "
             >
-              A preheader is the short summary text that follows the subject line when
-              an email is viewed in the inbox.
+              Please open this email to verify your email
             </div>
             <table border="0" cellpadding="0" cellspacing="0" width="100%">
               <tr>
@@ -130,28 +150,6 @@ let transport = nodemailer.createTransport({
                     width="100%"
                     style="max-width: 600px"
                   >
-                    <tr>
-                      <td align="center" valign="top" style="padding: 36px 24px">
-                        <a
-                          href="https://www.blogdesire.com"
-                          target="_blank"
-                          style="display: inline-block"
-                        >
-                          <img
-                            src="https://www.blogdesire.com/wp-content/uploads/2019/07/blogdesire-1.png"
-                            alt="Logo"
-                            border="0"
-                            width="48"
-                            style="
-                              display: block;
-                              width: 48px;
-                              max-width: 48px;
-                              min-width: 48px;
-                            "
-                          />
-                        </a>
-                      </td>
-                    </tr>
                   </table>
                 </td>
               </tr>
@@ -174,6 +172,18 @@ let transport = nodemailer.createTransport({
                           border-top: 3px solid #d4dadf;
                         "
                       >
+                      
+                      <h1
+                      style="
+                        margin: 0;
+                        font-size: 32px;
+                        font-weight: 700;
+                        letter-spacing: -1px;
+                        line-height: 48px;
+                      "
+                    >
+                      Hi ${firstname}
+                    </h1>
                         <h1
                           style="
                             margin: 0;
@@ -230,8 +240,7 @@ let transport = nodemailer.createTransport({
                                     style="border-radius: 6px"
                                   >
                                     <a
-                                      href="{link}"
-                                      target="_blank"
+                                    href=${link}
                                       style="
                                         display: inline-block;
                                         padding: 16px 36px;
@@ -243,7 +252,8 @@ let transport = nodemailer.createTransport({
                                         border-radius: 6px;
                                       "
                                       >Verify Your Email Address</a
-                                    >
+                                    ></a>
+                                    
                                   </td>
                                 </tr>
                               </table>
@@ -268,7 +278,7 @@ let transport = nodemailer.createTransport({
                           your browser:
                         </p>
                         <p style="margin: 0">
-                          <a href="{link}" target="_blank">Site</a>
+                          <a href=${link} target="_blank">Site</a>
                         </p>
                       </td>
                     </tr>
@@ -330,27 +340,30 @@ let transport = nodemailer.createTransport({
         `,
   };
   try {
-    const hashtoken=await hashFunction(token)
+    const hashtoken = await hashFunction(token);
     // console.log(hashtoken);
-    const newVerifiedEmail=await verify.create({
-        userId:_id,
-        token:hashtoken,
-        createdAt:Date.now(),
-        expiresAt:Date.now()+4000000
-    })
+    const newVerifiedEmail = await verify.create({
+      userId: _id,
+      token: hashtoken,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 4000000,
+    });
     // console.log(newVerifiedEmail);
-    if(newVerifiedEmail)
-    {
-      console.log(transport);
-      transport.sendMail(mailOptions).then(()=>{
-        res.status(201).send({
-          success:"Pending",
-          message:"Verification email has been sent to your account.Please check your email for further actions"
+    if (newVerifiedEmail) {
+      // console.log(transport);
+      transport
+        .sendMail(mailOptions)
+        .then(() => {
+          res.status(201).send({
+            success: "Pending",
+            message:
+              "Verification email has been sent to your account.Please check your email for further actions",
+          });
         })
-      }).catch((e)=>{
-        console.log(e);
-        res.status(404).json({message:"Something Went Wrong"})
-      })
+        .catch((e) => {
+          // console.log(e);
+          res.status(404).json({ message: "Something Went Wrong" });
+        });
     }
   } catch (error) {
     console.log(error.message);
@@ -359,4 +372,4 @@ let transport = nodemailer.createTransport({
       .json({ message: "Something went wrong sorry for inconvenience" });
   }
 };
-module.exports={sendVerificationEmail}
+module.exports = { sendVerificationEmail };

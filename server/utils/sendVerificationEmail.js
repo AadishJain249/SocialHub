@@ -1,19 +1,17 @@
 const verify = require("../models/emailVerification");
-const { hashFunction, hashString } = require("./hashPassword");
+const { hashFunction, createJwt } = require("./function");
 const nodemailer = require("nodemailer");
 const uuid4 = require("uuid");
 const dotenv = require("dotenv");
 dotenv.config();
 const { google } = require("googleapis");
+const password = require("../models/password_reset");
 // These id's and secrets should come from .env file.
-
 const sendVerificationEmail = async (user, res) => {
-  const CLIENT_ID =
-    "354978777863-fgn43l53tdesmpkuf4603jjuise8dda3.apps.googleusercontent.com";
-  const CLIENT_SECRET = "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";
-  const REFRESH_TOKEN =
-    "1//04xKpAZ2nssDXCgYIARAAGAQSNwF-L9Ir6GgjZCrcqNcoMZjmRaHkovN1_gbMmzqGLoN6RjdCZ93gPWEaAhdw2tg7Ulu8Mgoq8vU";
-  const REDIRECT_URI = "https://developers.google.com/oauthplayground";
+  const CLIENT_ID = process.env.CLIENT_ID;
+  const CLIENT_SECRET = process.env.CLIENT_SECRET;
+  const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+  const REDIRECT_URI = process.env.REDIRECT_URI;
   const oAuth2Client = new google.auth.OAuth2(
     CLIENT_ID,
     CLIENT_SECRET,
@@ -39,12 +37,12 @@ const sendVerificationEmail = async (user, res) => {
     },
   });
   // console.log(user);
-  console.log("aadisgh");
+  console.log("aadish");
   const { _id, email, firstname } = user;
   // console.log(_id+" "+email);
   const token = _id + uuid4;
   // console.log(token);
-  const link="https://google.com"
+  const link = "https://google.com";
   // const link = url + "users/verify" + _id + "/" + token;
   const mailOptions = {
     from: process.env.Authemail,
@@ -341,12 +339,12 @@ const sendVerificationEmail = async (user, res) => {
   };
   try {
     const hashtoken = await hashFunction(token);
-    // console.log(hashtoken);
+    console.log(hashtoken);
     const newVerifiedEmail = await verify.create({
       userId: _id,
       token: hashtoken,
       createdAt: Date.now(),
-      expiresAt: Date.now() + 4000000,
+      expiresAt: Date.now() + 14000000,
     });
     // console.log(newVerifiedEmail);
     if (newVerifiedEmail) {
@@ -372,4 +370,96 @@ const sendVerificationEmail = async (user, res) => {
       .json({ message: "Something went wrong sorry for inconvenience" });
   }
 };
-module.exports = { sendVerificationEmail };
+const ResetPassword = async (user, res) => {
+  const CLIENT_ID = process.env.CLIENT_ID;
+  const CLIENT_SECRET = process.env.CLIENT_SECRET;
+  const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+  const REDIRECT_URI = process.env.REDIRECT_URI;
+  const oAuth2Client = new google.auth.OAuth2(
+    CLIENT_ID,
+    CLIENT_SECRET,
+    REDIRECT_URI
+  );
+  oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+  const accessToken = await oAuth2Client.getAccessToken();
+  // console.log(accessToken);
+  const transport = nodemailer.createTransport({
+    service: "gmail",
+    port: 465,
+    secure: true,
+    auth: {
+      type: "OAuth2",
+      user: process.env.Authemail,
+      clientId: CLIENT_ID,
+      clientSecret: CLIENT_SECRET,
+      refreshToken: REFRESH_TOKEN,
+      accessToken: accessToken,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+  const { _id, email } = user;
+  // console.log(user);
+  const token = _id + uuid4;
+  const link = `https://localhost:3000/user/reset-password/${_id}/${token}`;
+  console.log(link);
+  const mailOptions = {
+    from: process.env.Authemail,
+    to: email,
+    subject: "Email Verification",
+    html: `<!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <title></title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link href="css/style.css" rel="stylesheet" />
+        <!-- Latest compiled and minified CSS -->
+        <link
+          rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+        />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      </head>
+      <body>
+        <div class="card text-center" style="width: 300px">
+          <div class="card-header h5 text-white bg-primary">Password Reset</div>
+          <div class="card-body px-5">
+            <p class="card-text py-2">Password Reset Link.Please Click the link below to the reset password </p>
+            <p class="card-text py-2"><b>Link Will Be Expired in 10 minutes</b> </p>
+            <a href=${link} class="btn btn-primary w-100">Reset password</a>
+          </div>
+        </div>
+      </body>
+    </html>
+    `,
+  };
+  try {
+    const hashtoken = await hashFunction(token);
+    console.log(hashtoken);
+    const newPasswordReset = await password.create({
+      userId: _id,
+      email: email,
+      token: hashtoken,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 14000000,
+    });
+    if (newPasswordReset) {
+      transport
+        .sendMail(mailOptions)
+        .then(() => {
+          res.status(201).send({
+            success: "Pending",
+            message: "Password reset link has been sent to your email",
+          });
+        })
+        .catch((e) => {
+          console.log(e.message);
+          res.status(404).json({ message: "Something went wrong sorry for inconvenience" });
+        });
+    }
+  } catch (error) {}
+};
+module.exports = { sendVerificationEmail,ResetPassword };

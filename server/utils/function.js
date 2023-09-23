@@ -1,8 +1,8 @@
 const bycrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const hashFunction = async (password) => {
+const hashFunction = async (value) => {
   const salt = await bycrypt.genSalt(10);
-  const hash = await bycrypt.hash(password, salt);
+  const hash = await bycrypt.hash(value, salt);
   return hash;
 };
 const createJwt = (id) => {
@@ -13,12 +13,13 @@ const createJwt = (id) => {
   return token;
 };
 
-const compareToken = async (pass, input_pass) => {
-  if (pass !== input_pass) return false;
+const compareToken = async (token, get_token) => {
+  // console.log(token+" "+get_token);
+  if (token !== get_token) return false;
   return true;
 };
-const comparePassword = async (pass, input_pass) => {
-  const matched = await bycrypt.compare(pass, input_pass);
+const comparePassword = async (password, input_password) => {
+  const matched = await bycrypt.compare(password, input_password);
   return matched;
 };
 module.exports = { hashFunction, createJwt, comparePassword, compareToken };

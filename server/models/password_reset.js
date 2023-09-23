@@ -10,7 +10,7 @@ const passwordScheme = new mongoose.Schema(
     unique:true
    },
    token:{
-    String
+    type:String
    },
    createdAt:{
     type:Date

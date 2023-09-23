@@ -3,7 +3,7 @@ const {
   comparePassword,
   createJwt,
   hashFunction,
-} = require("../utils/hashPassword");
+} = require("../utils/function");
 const { sendVerificationEmail } = require("../utils/sendVerificationEmail");
 const register = async (req, res, next) => {
   // console.log("aadish");

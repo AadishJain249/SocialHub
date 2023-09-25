@@ -42,8 +42,8 @@ const sendVerificationEmail = async (user, res) => {
   // console.log(_id+" "+email);
   const token = _id + uuid4;
   // console.log(token);
-  const link = "https://google.com";
-  // const link = url + "users/verify" + _id + "/" + token;
+  const url = process.env.App_Url
+  const link = url + "users/verify" + _id + "/" + token;
   const mailOptions = {
     from: process.env.Authemail,
     to: email,
@@ -402,8 +402,9 @@ const ResetPassword = async (user, res) => {
   const { _id, email } = user;
   // console.log(user);
   const token = _id + uuid4;
-  const link = `https://localhost:3000/user/reset-password/${_id}/${token}`;
-  console.log(link);
+  const url=process.env.App_Url
+  const link = `${url}/user/reset-password/${_id}/${token}`;
+  // console.log(link);
   const mailOptions = {
     from: process.env.Authemail,
     to: email,

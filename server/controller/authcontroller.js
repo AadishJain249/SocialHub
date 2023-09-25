@@ -2,7 +2,8 @@ const Users = require("../models/user");
 const {
   comparePassword,
   createJwt,
-  hashFunction,
+
+  hashPasswords,
 } = require("../utils/function");
 const { sendVerificationEmail } = require("../utils/sendVerificationEmail");
 const register = async (req, res, next) => {
@@ -14,14 +15,14 @@ const register = async (req, res, next) => {
     return;
   }
   try {
-    console.log(email);
+    // console.log(email);
     let usersExist = await Users.findOne({ email });
-    console.log(usersExist);
+    // console.log(usersExist);
     if (usersExist) {
       return res.status(401).send({ message: "User already exist" });
     }
-    const hashPassword = await hashFunction(password);
-    console.log(hashPassword);
+    const hashPassword = await hashPasswords(password);
+    // console.log(hashPassword);
     const users = new Users({
       firstname,
       lastname,
@@ -46,13 +47,13 @@ const login = async (req, res, next) => {
     // find user by email
     const user = await Users.findOne({ email }).select("+password").populate({
       path: "friends",
-      select: "Firstname LastName Location ProfileUrl -password",
+      select: "-password",
     });
     if (!user) {
       next("Invalid email or password");
       return;
     }
-    console.log(user);
+    // console.log(user);
     if (!user.verified) {
       next("User email is not verified.Please Verify Your Email");
       return;

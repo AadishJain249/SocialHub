@@ -12,14 +12,10 @@ const verifyEmail = async (req, res) => {
   try {
     const data = await verify.findOne({ userId });
     // console.log(data);
-    // console.log("aadish");
     if (data) {
       const { expiresAt, token: hashedToken } = data;
       // console.log(token);
       // console.log(data);
-      // console.log("aadishjain");
-      //   console.log(expiresAt);
-      //   console.log(hashedToken);
       if (expiresAt < Date.now()) {
         verify.findOneAndDelete({ userId }).then(() => {
           Users.findOneAndDelete({ _id: userId })
@@ -90,23 +86,20 @@ const ResetThePassword = async (req, res) => {
     if (!userExist) {
       res.status(403).send("User Doesn't Exist.");
     }
-    console.log(userExist);
+    // console.log(userExist);
     const userPasswordReset = await passwordmodel.findOne({ userId });
-    console.log(userPasswordReset);
+    // console.log(userPasswordReset);
     if (!userPasswordReset) {
       res.status(403).send("Invalid password reset link.Try Again");
     }
     const { expiresAt, token: resetToken } = userPasswordReset;
     // console.log(userPasswordReset+" "+"aadish");
     if (expiresAt < Date.now()) {
-      console.log("aa");
+      // console.log("aa");
       res.status(403).send("Password reset link has been expired");
     } else {
-      console.log(token);
-      console.log(resetToken);
-      const isMatch = await compareToken(token, resetToken);
       // console.log(token);
-      // console.log(resetToken);
+      const isMatch = await compareToken(token, resetToken);
       if (!isMatch) {
         // console.log("aad");
         res.status(403).send("Invalid password reset link.Try Again");
@@ -144,9 +137,9 @@ const changePassword = async (req, res) => {
 };
 const getUser = async (req, res, next) => {
   try {
-    const {id} = req.params;
-    console.log(id);
-    console.log(req.body.user);
+    const { id } = req.params;
+    // console.log(id);
+    // console.log(req.body.user);
     // const { userId } = req.body.user;
     const user = await Users.findById(id).populate({
       path: "friends",
@@ -171,22 +164,22 @@ const getUser = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const { firstName, lastName, location, profileUrl, profession } = req.body;
-    if ((!firstName || !lastName || !location || !profileUrl || !profession)) {
+    if (!firstName || !lastName || !location || !profileUrl || !profession) {
       return res.status(200).send("Please provide all required fields");
     }
-    const {userId} = req.body.user
+    const { userId } = req.body.user;
     const updateUser = {
       firstName,
       lastName,
       location,
       profileUrl,
       profession,
-      _id:userId,
+      _id: userId,
     };
     const user = await Users.findByIdAndUpdate(userId, updateUser, {
       new: true,
     });
-    await user.populate({ path: "friends", select: "-password" });
+    await user.populate({ path: "friends", select: "firstName lastName profileUrl profession -password" });
     const token = createJwt(user?._id);
     user.password = undefined;
     res.status(200).json({
@@ -203,27 +196,31 @@ const updateUser = async (req, res, next) => {
 const friendRequest = async (req, res, next) => {
   try {
     const { userId } = req.body.user;
-    const { id } = req.body;
+    const { requestTo } = req.body;
+    // console.log(userId);
+    // console.log(id);
     // if we  have has sent a request
     const requestExist = await request.findOne({
-      requestTo: id,
       requestFrom: userId,
+      requestTo,
     });
+    // console.log(requestExist);
     if (requestExist) {
       return res.status(200).send("Friend Request Already Been Sent");
     }
     // if they have sent us a request
     const accountExist = await request.findOne({
-      requestTo: userId,
-      requestFrom: id,
+      requestFrom: userId,
+      requestTo,
     });
     if (accountExist) {
       return res.status(200).send("Friend Request Already Been Sent");
     }
     const newRequest = new request({
-      requestTo: id,
+      requestTo,
       requestFrom: userId,
     });
+    // console.log(newRequest);
     await newRequest.save();
     res.status(201).json({
       success: true,
@@ -237,7 +234,8 @@ const friendRequest = async (req, res, next) => {
 const getFriendRequest = async (req, res, next) => {
   try {
     const { userId } = req.body.user;
-    // i will get the all person pending request populate who has sent this request
+    // console.log(userId);
+    // it will get the all person pending request populate who has sent this request
     const checkRequest = await request
       .find({
         requestTo: userId,
@@ -245,11 +243,12 @@ const getFriendRequest = async (req, res, next) => {
       })
       .populate({
         path: "requestFrom",
-        select: "firstName lastName profileUrl profession -password",
+        select: " -password",
       })
       .limit(10)
       .sort({ _id: -1 });
-    res.status(200).send({
+    // console.log(checkRequest);
+    res.status(200).json({
       success: true,
       data: checkRequest,
     });
@@ -260,9 +259,13 @@ const getFriendRequest = async (req, res, next) => {
 };
 const acceptRequest = async (req, res, next) => {
   try {
-    const id = req.body.user.userId;
-    const { rid, status } = req.body;
-    const requestExist = await request.findById(id);
+    const userId  = req.body.user.userId;
+    // console.log(userId); // request to
+    // console.log(id);
+    const { rid, status } = req.body; // request from
+    // console.log(rid); // rid that person data id we need to fetch
+    const requestExist = await request.findById(rid);
+    // console.log(requestExist);
     if (!requestExist) {
       return res.status(200).send("No Request Exist");
     }
@@ -272,16 +275,20 @@ const acceptRequest = async (req, res, next) => {
       },
       { requestStatus: status }
     );
+    console.log(newRes);
     if (status === "Accepted") {
-      const user = await Users.findById(newRes?.requestFrom);
+      const user = await Users.findById(userId);
+      // console.log(user);
+      user.friends.push(newRes?.requestFrom)
+      // console.log(user);
       await user.save();
       const friend = await Users.findById(newRes?.requestFrom);
-      friend.friends.push(newRes?.requestTo);
+      friend.friends.push(newRes?.requestTo); 
       await friend.save();
     }
     res.status(201).json({
       success: true,
-      message: "Friend Request" + status,
+      message: "Friend Request" +" "+status,
     });
   } catch (error) {
     console.log(error.message);
@@ -306,16 +313,18 @@ const profileView = async (req, res, next) => {
 };
 const suggestedFriends = async (req, res, next) => {
   try {
-    const {userId}=req.body.user
-    let queryObject={}
-    queryObject._id={$ne:userId}
-    queryObject.friends={$nin:userId}
-    let queryResult=Users.find(queryObject).limit(15).select("firstName lastName profileUrl profession -password") 
-    const suggested=await queryResult
+    const { userId } = req.body.user;
+    let queryObject = {};
+    queryObject._id = { $ne: userId };
+    queryObject.friends = { $nin: userId };
+    let queryResult = Users.find(queryObject)
+      .limit(15)
+      .select("firstName lastName profileUrl profession -password");
+    const suggested = await queryResult;
     res.status(200).json({
-      success:true,
-      data:suggested
-    })   
+      success: true,
+      data: suggested,
+    });
   } catch (error) {
     console.log(error.message);
     res.status(500).send("Internal Server Error");
@@ -332,5 +341,9 @@ module.exports = {
   getFriendRequest,
   acceptRequest,
   profileView,
-  suggestedFriends
+  suggestedFriends,
 };
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTEwOTM1MDYwZTEwOWNjYTc4NmZiNmYiLCJpYXQiOjE2OTU1ODUxNTEsImV4cCI6MTY5NTY3MTU1MX0.8ReFjW-whD0-kdPiesH-wgEX7bd6-4p_OMHlrQIiJvY
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTEwOTM4ZmI1NThlNjcxMWEwN2FiMzUiLCJpYXQiOjE2OTU1ODUyMTAsImV4cCI6MTY5NTY3MTYxMH0.cfPy8uJT3ZmNRJ0c08VVPA7sBNlA_zWxcn2EEKKHkfQ
+// 6510935060e109cca786fb6f
+// 6510938fb558e6711a07ab35

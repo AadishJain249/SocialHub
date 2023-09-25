@@ -87,12 +87,14 @@ const userParticularPost = async (req, res, next) => {
 const getUserPosts = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const post = await Posts.findById({ userId: id })
+    console.log(id);
+    const post = await Posts.find({userId:id})
       .populate({
         path: "userId",
         select: "-password",
       })
       .sort({ _id: -1 });
+      console.log(post);
     res.status(200).json({
       success: true,
       data: post,
@@ -106,9 +108,10 @@ const getUserPosts = async (req, res, next) => {
 const getComments = async (req, res, next) => {
   try {
     const { postId } = req.params;
-    const postComments = await Posts.findById({ postId })
+    console.log(postId);
+    const postComments = await Comments.find({postId})
       .populate({
-        path: "userID",
+        path: "userId",
         select: "-password",
       })
       .populate({
@@ -116,6 +119,7 @@ const getComments = async (req, res, next) => {
         select: "-password",
       })
       .sort({ _id: -1 });
+      console.log(postComments);
     res.status(200).json({
       success: true,
       data: postComments,
@@ -130,7 +134,7 @@ const likePost = async (req, res, next) => {
   try {
     const { userId } = req.body.user;
     const { id } = req.params;
-    const post = await Posts.findById(userId);
+    const post = await Posts.findById(id);
     const index = post.likes.findIndex((pid) => pid == String(userId));
     // likes
     if (index == -1) {
@@ -156,21 +160,25 @@ const likePost = async (req, res, next) => {
 const likePostComment = async (req, res, next) => {
   const { userId } = req.body.user;
   const { id, rid } = req.params;
+  console.log(id);
+  console.log(userId);
   try {
-    if (rid == null || rid === undefined || rid == "false") {
+    if (rid === null || rid === undefined || rid === "false") {
       const comment = await Comments.findById(id);
+      console.log(comment);
       const index = comment.likes.findIndex((pid) => pid === String(userId));
+      console.log(index);
       // likes
-      if (index == -1) {
+      if (index === -1) {
+        console.log(comment.likes);
         comment.likes.push(userId);
+        console.log(comment.likes);
       }
       // unlikes
       else {
         comment.likes = comment.likes.filter((pid) => pid !== String(userId));
       }
-      const updated = await Comments.findByIdAndUpdate(id, post, {
-        new: true,
-      });
+      const updated = await Comments.findByIdAndUpdate(id, comment, {new: true,});
       res.status(201).json({
         success: true,
         data: updated,
@@ -183,7 +191,7 @@ const likePostComment = async (req, res, next) => {
         },
         {
           replies: {
-            $eleMatch: {
+            $elemMatch: {
               _id: rid,
             },
           },
@@ -221,13 +229,16 @@ const commentPost = async (req, res, next) => {
       res.status(200).send({ message: "Comment is required" });
     }
     const newComment = new Comments({ comment, from, userId, postId: id });
+    
     await newComment.save();
     const post = await Posts.findById(id);
     post.comments.push(newComment._id);
     const updatedPost = await Posts.findByIdAndUpdate(id, post, {
       new: true,
     });
-    res.status(201).json(updatedPost);
+    console.log(newComment);
+    console.log(updatedPost);
+    res.status(201).json(newComment);
   } catch (error) {
     console.log(error.message);
     return res.status(404).json({ message: error.message });
@@ -235,14 +246,18 @@ const commentPost = async (req, res, next) => {
 };
 
 const replyPostComment = async (req, res, next) => {
+  console.log("aadish");
+  const { comment, replyAt, from } = req.body;
+  const { userId } = req.body.user;
+  const { id } = req.params;
+  console.log(id);
+  console.log("aadish");
   try {
-    const { comment, replyAt, from } = req.body;
-    const { userId } = req.body.user;
-    const { id } = req.params;
     if (comment === null) {
       res.status(200).send({ message: "Comment is required" });
     }
     const commentInfo = await Comments.findById(id);
+    console.log(commentInfo);
     commentInfo.replies.push({
       comment,
       replyAt,

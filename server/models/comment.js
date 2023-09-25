@@ -17,7 +17,9 @@ const commentScheme = new mongoose.Schema({
         required:true
     },
     replies:[{
-        rid:{type:mongoose.Schema.Types.ObjectId},
+        rid:{
+            type:mongoose.Schema.Types.ObjectId
+        },
         userId:{
             type: mongoose.Schema.ObjectId,
             ref: "Users"

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Email Verifcation</title>
+    <style>
+      body {
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: rgba(0, 0, 0, 0.2);
+      }
+      .card {
+        border-radius: 10px;
+        padding: 20px;
+        background-color: white;
+        box-shadow: 0px 4px 8px rgba(6, 6, 6, 0.2);
+      }
+      .icon {
+        font-size: 70px;
+        margin-left: 25px;
+      }
+      .success {
+        color: lightgreen;
+      }
+      .error {
+        color: red;
+      }
+      .hideBtn {
+        display: none;
+      }
+      #btn
+      {
+        text-decoration: none;
+        font-weight: 900;
+        font-size: 32px;
+      }
+      .showBtn {
+        display: flex;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        border-radius: 5px;
+        padding: 10px;
+        background-color: rgba(1, 116, 210, 0.971);
+        color: white;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="icon">
+        <span id="statusIcon"></span>
+      </div>
+      <div id="statusMessage"></div>
+      <a href="http://localhost:3001/login" id="btn">Login</a>
+    </div>
+
+    <script nonce='b64value'>
+      const urlParameters = new URLSearchParams(window.location.search);
+      const statuss = urlParameters.get("status");
+      const message = urlParameters.get("message");
+      const cards = document.querySelector(".card");
+      const statusIcon = document.getElementById("statusIcon");
+      const statusMessage = document.getElementById("statusMessage");
+      const button = document.getElementById("btn");
+      console.log(statuss);
+      console.log(message);
+      if (statuss === "success") {
+        statusIcon.innerHTML = "✅";
+        statusMessage.textContent = message;
+        cards.classList.add("success");
+        statusIcon.classList.add("success");
+        statusMessage.classList.add("success");
+        button.classList.add("showBtn");
+      } else if (statuss === "error") {
+        statusIcon.innerHTML = "❌";
+        statusMessage.textContent = message;
+        cards.classList.add("error");
+        statusIcon.classList.add("error");
+        statusMessage.classList.add("error");
+        button.classList.add("hideBtn");
+      }
+    </script>
+  </body>
+</html>

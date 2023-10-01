@@ -1,8 +1,9 @@
 const Comments = require("../models/comment");
 const Posts = require("../models/post");
 const Users = require("../models/user");
-const { post } = require("../routers/userRouter");
+// const { post } = require("../routers/userRouter");
 const addPost = async (req, res, next) => {
+  console.log("aadish");
   try {
     const { userId } = req.body.user; // during login time middleware will provide the user id req next(attach id) res
     const { description, image } = req.body;
@@ -136,6 +137,9 @@ const likePost = async (req, res, next) => {
     const { id } = req.params;
     const post = await Posts.findById(id);
     const index = post.likes.findIndex((pid) => pid == String(userId));
+    console.log(index);
+    console.log(id);
+    console.log(userId);
     // likes
     if (index == -1) {
       post.likes.push(userId);

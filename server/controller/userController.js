@@ -1,62 +1,86 @@
 const mongoose = require("mongoose");
 const verify = require("../models/emailVerification");
-const { compareToken, hashFunction, createJwt } = require("../utils/function");
+const {
+  compareToken,
+  hashFunction,
+  createJwt,
+  comparePassword,
+} = require("../utils/function");
 const Users = require("../models/user");
 const { ResetPassword } = require("../utils/sendVerificationEmail");
 const passwordmodel = require("../models/password_reset");
 const request = require("../models/request");
 const verifyEmail = async (req, res) => {
   const { userId, token } = req.params;
-  //   console.log(userId);
-  //   console.log(token);
+  console.log(userId + "yess");
+  console.log(token + "verify");
   try {
     const data = await verify.findOne({ userId });
-    // console.log(data);
+    console.log(data);
     if (data) {
+      console.log(data);
       const { expiresAt, token: hashedToken } = data;
-      // console.log(token);
-      // console.log(data);
       if (expiresAt < Date.now()) {
-        verify.findOneAndDelete({ userId }).then(() => {
-          Users.findOneAndDelete({ _id: userId })
-            .then(() => {
-              res
-                .status(403)
-                .send({ message: "Verification Token Has Expired" });
-            })
-            .catch((e) => {
-              res.status(403).send(e.message);
-            });
-        });
+        verify
+          .findOneAndDelete({ userId })
+          .then(() => {
+            Users.findOneAndDelete({ _id: userId })
+              .then(() => {
+                const message = "Verification Token Has Expired";
+                console.log("aadish1");
+                res.redirect(`/user/verified?status=error&message=${message}`);
+              })
+              .catch((e) => {
+                console.log("aadish12");
+                res.redirect(`/user/verified?message=`);
+              });
+          })
+          .catch((e) => {
+            res.redirect(`/user/verified?message=`);
+          });
       } else {
-        // console.log("aadishisgood");
+        console.log("aadishisgood");
         compareToken(token, hashedToken)
           .then((matched) => {
-            // console.log(matched);
+            console.log(matched);
             if (matched) {
               Users.findByIdAndUpdate({ _id: userId }, { verified: true })
                 .then(() => {
                   verify.findOneAndDelete({ userId }).then(() => {
                     const message = "Email Verified Succesfully";
-                    res.status(203).send(message);
+                    console.log("aadish2");
+                    res.redirect(
+                      `/user/verified?status=success&message=${message}`
+                    );
                   });
                 })
                 .catch((e) => {
                   console.log(e);
-                  res.status(403).send(e.message);
+                  const message = "Verification Failed or link is expired";
+                  console.log("aadish3");
+                  res.redirect(
+                    `/user/verified?status=error&message=${message}`
+                  );
                 });
             } else {
-              const message = "Verification Failed";
-              res.status(403).send(message);
+              const message = "Verification Failed or link is expired";
+              console.log("aadish4");
+              res.redirect(`/user/verified?status=error&message=${message}`);
             }
           })
-          .catch((e) => {
-            console.log(e);
-            res.status(403).send(e.message);
+          .catch((error) => {
+            console.log(error);
+            res.redirect(`/user/verified?message=`);
           });
       }
+    } else {
+      const message = "Invalid verification link.Try Again later";
+      res.redirect(`/user/verified?status=error&message=${message}`);
     }
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    res.redirect(`/user/verified?message=`);
+  }
 };
 const passwordReset = async (req, res) => {
   try {
@@ -163,14 +187,14 @@ const getUser = async (req, res, next) => {
 };
 const updateUser = async (req, res, next) => {
   try {
-    const { firstName, lastName, location, profileUrl, profession } = req.body;
-    if (!firstName || !lastName || !location || !profileUrl || !profession) {
+    const { firstname, lastname, location, profileUrl, profession } = req.body;
+    if (!firstname || !lastname || !location || !profileUrl || !profession) {
       return res.status(200).send("Please provide all required fields");
     }
     const { userId } = req.body.user;
     const updateUser = {
-      firstName,
-      lastName,
+      firstname,
+      lastname,
       location,
       profileUrl,
       profession,
@@ -179,14 +203,15 @@ const updateUser = async (req, res, next) => {
     const user = await Users.findByIdAndUpdate(userId, updateUser, {
       new: true,
     });
-    await user.populate({ path: "friends", select: "firstName lastName profileUrl profession -password" });
+    console.log(user);
+    await user.populate({ path: "friends", select: " -password" });
     const token = createJwt(user?._id);
     user.password = undefined;
     res.status(200).json({
       success: true,
       message: "User updated successfully",
-      user,
       token,
+      user,
     });
   } catch (error) {
     console.log(error.message);
@@ -259,7 +284,7 @@ const getFriendRequest = async (req, res, next) => {
 };
 const acceptRequest = async (req, res, next) => {
   try {
-    const userId  = req.body.user.userId;
+    const userId = req.body.user.userId;
     // console.log(userId); // request to
     // console.log(id);
     const { rid, status } = req.body; // request from
@@ -279,16 +304,16 @@ const acceptRequest = async (req, res, next) => {
     if (status === "Accepted") {
       const user = await Users.findById(userId);
       // console.log(user);
-      user.friends.push(newRes?.requestFrom)
+      user.friends.push(newRes?.requestFrom);
       // console.log(user);
       await user.save();
       const friend = await Users.findById(newRes?.requestFrom);
-      friend.friends.push(newRes?.requestTo); 
+      friend.friends.push(newRes?.requestTo);
       await friend.save();
     }
     res.status(201).json({
       success: true,
-      message: "Friend Request" +" "+status,
+      message: "Friend Request" + " " + status,
     });
   } catch (error) {
     console.log(error.message);
@@ -312,19 +337,17 @@ const profileView = async (req, res, next) => {
   }
 };
 const suggestedFriends = async (req, res, next) => {
+  const {userId}=req.body.user
   try {
-    const { userId } = req.body.user;
-    let queryObject = {};
-    queryObject._id = { $ne: userId };
-    queryObject.friends = { $nin: userId };
-    let queryResult = Users.find(queryObject)
-      .limit(15)
-      .select("firstName lastName profileUrl profession -password");
-    const suggested = await queryResult;
-    res.status(200).json({
-      success: true,
-      data: suggested,
-    });
+    const people = await Users.find()
+      .merge({
+        _id: { $nin: userId },
+        "friends": { $nin: userId},
+      })
+      .select('-password')
+      .limit(6);
+    console.log(people);
+    res.status(200).json({ success: true, data: people });
   } catch (error) {
     console.log(error.message);
     res.status(500).send("Internal Server Error");
@@ -343,7 +366,3 @@ module.exports = {
   profileView,
   suggestedFriends,
 };
-// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTEwOTM1MDYwZTEwOWNjYTc4NmZiNmYiLCJpYXQiOjE2OTU1ODUxNTEsImV4cCI6MTY5NTY3MTU1MX0.8ReFjW-whD0-kdPiesH-wgEX7bd6-4p_OMHlrQIiJvY
-// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTEwOTM4ZmI1NThlNjcxMWEwN2FiMzUiLCJpYXQiOjE2OTU1ODUyMTAsImV4cCI6MTY5NTY3MTYxMH0.cfPy8uJT3ZmNRJ0c08VVPA7sBNlA_zWxcn2EEKKHkfQ
-// 6510935060e109cca786fb6f
-// 6510938fb558e6711a07ab35

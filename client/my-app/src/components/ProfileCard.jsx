@@ -14,11 +14,15 @@ import moment from "moment";
 
 import { NoProfile } from "../assets";
 import { UpdateProfile } from "../redux/userSlice";
+import { sendFriendRequest } from "../utils";
 
-const ProfileCard = ({ user }) => {
+const ProfileCard = ({user}) => {
   const { user: data, edit } = useSelector((state) => state.user);
+  console.log(user);
+  console.log("profilecard");
   const dispatch = useDispatch();
-
+  // console.log(data);
+  // console.log(user._id);
   return (
     <div>
       <div className='w-full bg-primary flex flex-col items-center shadow-sm rounded-xl px-6 py-4 '>
@@ -32,7 +36,7 @@ const ProfileCard = ({ user }) => {
 
             <div className='flex flex-col justify-center'>
               <p className='text-lg font-medium text-ascent-1'>
-                {user?.firstName} {user?.lastName}
+                {user?.firstname} {user?.lastname}
               </p>
               <span className='text-ascent-2'>
                 {user?.profession ?? "No Profession"}
@@ -50,7 +54,7 @@ const ProfileCard = ({ user }) => {
             ) : (
               <button
                 className='bg-[#0444a430] text-sm text-white p-1 rounded'
-                onClick={() => {}}
+                onClick={() =>sendFriendRequest(data.token,user._id)}
               >
                 <BsPersonFillAdd size={20} className='text-[#0f52b6]' />
               </button>

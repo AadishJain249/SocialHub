@@ -1,37 +1,142 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import CustomButton from "../components/CustomButton";
 import EditProfile from "../components/EditProfile";
 import FriendsCard from "../components/FriendsCard";
 import Loading from "../components/Loading";
 import PostCard from "../components/PostCard";
 import TextInput from "../components/TextInput";
-// import TopBar from "../components/TopBar";
 import Topbar from "../components/Topbar";
 import ProfileCard from "../components/ProfileCard";
-import { suggest, requests, posts } from "../assets/data";
+// import { suggest, requests} from "../assets/data";
 import { Link } from "react-router-dom";
 import { NoProfile } from "../assets";
 import { BsFiletypeGif, BsPersonFillAdd } from "react-icons/bs";
 import { BiImages, BiSolidVideo } from "react-icons/bi";
 import { useForm } from "react-hook-form";
-
+import { apiRequest, handleFileUpload,fetchPost, likePost, deletePost, sendFriendRequest, getUserInfo} from "../utils";
+import { UserLogin } from "../redux/userSlice";
 const Home = () => {
   const { user, edit } = useSelector((state) => state.user);
-  const [friendRequest, setFriendRequest] = useState(requests);
-  const [suggestedFriends, setSuggestedFriends] = useState(suggest);
+  const {posts}=useSelector(state=>state.posts)
+  const [friendRequest, setFriendRequest] = useState([]);
+  const [suggestedFriends, setSuggestedFriends] = useState([]);
   const [errMsg, setErrMsg] = useState("");
   const [file, setFile] = useState(null);
   const [posting, setPosting] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const dispatch=useDispatch()
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm();
+  const fetchPosts=async()=>{
+    await fetchPost(user?.token,dispatch)
+    setLoading(false)
+  } 
+  const handleLikePost=async(uri)=>{
+    await likePost({uri:uri,token:user?.token})
+    await fetchPosts()
+  }
+  const handleDelete=async(id)=>{
+    await deletePost(id,user.token)
+    await fetchPosts()
+  }
+  const fetchFriendRequests=async()=>{
+    try {
+      const res=await apiRequest({
+        url:"/user/get-friend-request",
+        token:user?.token,
+        method:"POST"
+      })
+      // console.log("adsfnsdfjsdnjfn");
+      setFriendRequest(res?.data)
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  const fetchSuggestedFriends=async()=>{
+    try {
+      const res=await apiRequest({
+        url:"/user/suggested-friends",
+        token:user?.token,
+        method:"POST"
+      })
+      // console.log(res);
+      setSuggestedFriends(res?.data)
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  const handleFriendRequest=async(id)=>{
+    try {
+      const res=await sendFriendRequest(user.token,id);
+      await fetchSuggestedFriends()
 
-  const handlePostSubmit = async (data) => {};
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  const acceptFriendRequest=async(id,status)=>{
+    try {
+      const res=await apiRequest({
+        url:"/user/accept-request",
+        token:user?.token,
+        method:"POST",
+        data:{rid:id,status}
+      })
+      setFriendRequest(res?.data)
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  const getUser=async()=>{
+    const res=await getUserInfo(user?.token)
+    const newData={token:user?.token,...res}
+    // console.log(res);
+    // console.log(newData);
+    // dispatch(UserLogin(newData))
+  }
+  useEffect(()=>{
+    setLoading(true)
+    getUser()
+    fetchPosts()
+    fetchFriendRequests()
+    fetchSuggestedFriends()
+  },[])
+  const handlePostSubmit = async (data) => {
+    setPosting(true)
+    setErrMsg("")
+    try {
+      const uri=file && (await handleFileUpload(file))
+      const newData=uri?{...data,image:uri}:data;
+      const res=await apiRequest({
+        url:"/post/add-post",
+        data:newData,
+        token:user?.token,
+        method:"POST"
+      })
+      if(res?.status==='failed')
+      {
+        setErrMsg(res)
+      }
+      else
+      {
+        reset({
+          description:""
+        })  
+        setFile(null)
+        setErrMsg("")
+        await fetchPosts()
+      }
+      setPosting(false)
+    } catch (error) {
+      console.log(error);
+      setErrMsg("")
+    }
+  };
 
   return (
     <>
@@ -54,7 +159,7 @@ const Home = () => {
               <div className='w-full flex items-center gap-2 py-4 border-b border-[#66666645]'>
                 <img
                   src={user?.profileUrl}
-                  alt='User Image'
+                  alt={NoProfile}
                   className='w-14 h-14 rounded-full object-cover'
                 />
                 <TextInput
@@ -151,8 +256,8 @@ const Home = () => {
                   key={post?._id}
                   post={post}
                   user={user}
-                  deletePost={() => {}}
-                  likePost={() => {}}
+                  deletePost={handleDelete}
+                  likePost={handleLikePost}
                 />
               ))
             ) : (
@@ -166,7 +271,7 @@ const Home = () => {
           <div className='hidden w-1/4 h-full lg:flex flex-col gap-8 overflow-y-auto'>
             {/* FRIEND REQUEST */}
             <div className='w-full bg-primary shadow-sm rounded-lg px-6 py-5'>
-              <div className='flex items-center justify-between text-xl text-ascent-1 pb-2 border-b border-[#66666645]'>
+              <div className='flex itemfs-center justify-between text-xl text-ascent-1 pb-2 border-b border-[#66666645]'>
                 <span> Friend Request</span>
                 <span>{friendRequest?.length}</span>
               </div>
@@ -196,10 +301,13 @@ const Home = () => {
                     <div className='flex gap-1'>
                       <CustomButton
                         title='Accept'
+                        onClick={()=>acceptFriendRequest(_id,"Accepted")}
                         containerStyles='bg-[#0444a4] text-xs text-white px-1.5 py-1 rounded-full'
                       />
                       <CustomButton
                         title='Deny'
+                        
+                        onClick={()=>acceptFriendRequest(_id,"Denied")}
                         containerStyles='border border-[#666] text-xs text-ascent-1 px-1.5 py-1 rounded-full'
                       />
                     </div>
@@ -226,12 +334,12 @@ const Home = () => {
                     >
                       <img
                         src={friend?.profileUrl ?? NoProfile}
-                        alt={friend?.firstName}
+                        alt={friend?.firstname}
                         className='w-10 h-10 object-cover rounded-full'
                       />
                       <div className='flex-1 '>
                         <p className='text-base font-medium text-ascent-1'>
-                          {friend?.firstName} {friend?.lastName}
+                          {friend?.firstname} {friend?.lastname}
                         </p>
                         <span className='text-sm text-ascent-2'>
                           {friend?.profession ?? "No Profession"}
@@ -242,7 +350,7 @@ const Home = () => {
                     <div className='flex gap-1'>
                       <button
                         className='bg-[#0444a430] text-sm text-white p-1 rounded'
-                        onClick={() => {}}
+                        onClick={() =>handleFriendRequest(friend?._id)}
                       >
                         <BsPersonFillAdd size={20} className='text-[#0f52b6]' />
                       </button>

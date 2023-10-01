@@ -2,18 +2,20 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
-import { TbSocial } from "react-icons/tb";
+// import { TbSocial } from "react-icons/tb";
+import { BsFillPostcardFill } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
 import { BsShare } from "react-icons/bs";
 import { AiOutlineInteraction } from "react-icons/ai";
 import { ImConnection } from "react-icons/im";
-// import { CustomButton, Loading, TextInput } from "../components";
-
 import CustomButton from "../components/CustomButton";
 import Loading from "../components/Loading";
 import TextInput from "../components/TextInput";
-import { BgImage } from "../assets";
-
+import { BgImage } from "../assets/index";
+import { UserLogin } from "../redux/userSlice";
+import { apiRequest } from "../utils/index";
 const Login = () => {
+  const nav=useNavigate()
   const {
     register,
     handleSubmit,
@@ -21,12 +23,35 @@ const Login = () => {
   } = useForm({
     mode: "onChange",
   });
-
-  const onSubmit = async (data) => {};
-
   const [errMsg, setErrMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    try {
+      const res = await apiRequest({
+        url: "/auth/login",
+        data: data,
+        method: "POST",
+      });
+      console.log(res);
+      if (res?.success === 'failed') {
+        setErrMsg(res);
+      } 
+      else{
+        setErrMsg("");
+        const newData={token:res?.token,...res?.user}
+        console.log(newData);
+        dispatch(UserLogin(newData))
+        nav('/')  
+      }
+      setIsSubmitting(false)
+    } catch (error) {
+      console.log(error);
+      setIsSubmitting(false)
+    }
+  };
+
   return (
     <div className='bg-bgColor w-full h-[100vh] flex items-center justify-center p-6'>
       <div className='w-full md:w-2/3 h-fit lg:h-full 2xl:h-5/6 py-8 lg:py-0 flex bg-primary rounded-xl overflow-hidden shadow-xl'>
@@ -34,10 +59,10 @@ const Login = () => {
         <div className='w-full lg:w-1/2 h-full p-10 2xl:px-20 flex flex-col justify-center '>
           <div className='w-full flex gap-2 items-center mb-6'>
             <div className='p-2 bg-[#065ad8] rounded text-white'>
-              <TbSocial />
+              <BsFillPostcardFill />
             </div>
             <span className='text-2xl text-[#065ad8] font-semibold'>
-              ShareFun
+              SocialHub
             </span>
           </div>
 
@@ -78,7 +103,7 @@ const Login = () => {
 
             <Link
               to='/reset-password'
-              className='text-sm text-right text-blue font-semibold'
+              className='text-sm text-right text-blue font-semibold pt-4 '
             >
               Forgot Password ?
             </Link>
@@ -143,7 +168,7 @@ const Login = () => {
 
           <div className='mt-16 text-center'>
             <p className='text-white text-base'>
-              Connect with friedns & have share for fun
+              Connect with friends & have share for fun
             </p>
             <span className='text-sm text-white/80'>
               Share memories with friends and the world.

@@ -2,46 +2,50 @@ const Users = require("../models/user");
 const {
   comparePassword,
   createJwt,
-
   hashPasswords,
 } = require("../utils/function");
 const { sendVerificationEmail } = require("../utils/sendVerificationEmail");
 const register = async (req, res, next) => {
-  // console.log("aadish");
   const { firstname, lastname, email, password } = req.body;
-
   if (!firstname || !lastname || !email || !password) {
-    next("Please Provide Required Fields");
+    res.status(200).json({
+      success:"failed",
+      message:"Please Fill All Fields"
+    })
     return;
   }
   try {
-    // console.log(email);
     let usersExist = await Users.findOne({ email });
-    // console.log(usersExist);
     if (usersExist) {
-      return res.status(401).send({ message: "User already exist" });
+      res.status(200).json({
+        success:"failed",
+        message:"User Already Exist"
+      })
+      return
     }
     const hashPassword = await hashPasswords(password);
-    // console.log(hashPassword);
     const users = new Users({
       firstname,
       lastname,
       email,
       password: hashPassword,
     });
-    // console.log(users);
     await users.save();
     sendVerificationEmail(users, res);
   } catch (error) {
     console.log(error);
-    res.status(404).send(error.message);
+    // console.log("aadish");
+    res.status(500).send(error.message);
   }
 };
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     if (!email || !password) {
-      next("Please Provide Credentials");
+      res.status(200).json({
+        success:"failed",
+        message:"Please Fill All Fields"
+      })
       return;
     }
     // find user by email
@@ -50,18 +54,28 @@ const login = async (req, res, next) => {
       select: "-password",
     });
     if (!user) {
-      next("Invalid email or password");
+      // next("Invalid email or password");
+      res.status(200).json({
+        success:"failed",
+        message:"Invalid Email Or Password"
+      })
       return;
     }
     // console.log(user);
     if (!user.verified) {
-      next("User email is not verified.Please Verify Your Email");
+      res.status(200).json({
+        success:"failed",
+        message:"Please Verify Yourself On Email First"
+      })
       return;
     }
     // now compare password
     const match = await comparePassword(password, user?.password);
     if (!match) {
-      next("Wrong Password Please Check Your Password");
+      res.status(200).json({
+        success:"failed",
+        message:"Password Doesn't Match"
+      })
       return;
     }
     // now make user password in the database undefined
@@ -76,7 +90,7 @@ const login = async (req, res, next) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(404).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 module.exports = { register, login };

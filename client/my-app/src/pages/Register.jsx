@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
-import { TbSocial } from "react-icons/tb";
+import { BsFillPostcardFill } from "react-icons/bs";
 import { BsShare } from "react-icons/bs";
 import { AiOutlineInteraction } from "react-icons/ai";
 import { ImConnection } from "react-icons/im";
@@ -11,22 +11,40 @@ import CustomButton from "../components/CustomButton";
 import Loading from "../components/Loading";
 import TextInput from "../components/TextInput";
 import { BgImage } from "../assets";
-
+import { apiRequest } from "../utils";
 const Register = () => {
   const {
     register,
     handleSubmit,
     getValues,
     formState: { errors },
-  } = useForm({
-    mode: "onChange",
-  });
-
-  const onSubmit = async (data) => {};
-
+  } = useForm({ mode: "onChange" });
   const [errMsg, setErrMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    try {
+      const res = await apiRequest({
+        url: "/auth/register",
+        data: data,
+        method: "POST",
+      });
+      console.log(res);
+      if (res?.status === undefined) {
+        setErrMsg(res);
+      } else {
+        setErrMsg(res);
+        setTimeout(() => {
+          window.location.replace("/login")
+        }, 5000);
+        
+      }
+      setIsSubmitting(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="bg-bgColor w-full h-[100vh] flex items-center justify-center p-6">
@@ -35,10 +53,10 @@ const Register = () => {
         <div className="w-full lg:w-1/2 h-full p-10 2xl:px-20 flex flex-col justify-center ">
           <div className="w-full flex gap-2 items-center mb-6">
             <div className="p-2 bg-[#065ad8] rounded text-white">
-              <TbSocial />
+              <BsFillPostcardFill />
             </div>
-            <span className="text-2xl text-[#065ad8] " font-semibold>
-              ShareFun
+            <span className="text-2xl text-[#065ad8]  font-semibold">
+              SocialHub
             </span>
           </div>
 
@@ -52,26 +70,26 @@ const Register = () => {
           >
             <div className="w-full flex flex-col lg:flex-row gap-1 md:gap-2">
               <TextInput
-                name="firstName"
+                name="firstname"
                 label="First Name"
                 placeholder="First Name"
                 type="text"
                 styles="w-full"
-                register={register("firstName", {
+                register={register("firstname", {
                   required: "First Name is required!",
                 })}
-                error={errors.firstName ? errors.firstName?.message : ""}
+                error={errors.firstname ? errors.firstname?.message : ""}
               />
 
               <TextInput
                 label="Last Name"
                 placeholder="Last Name"
-                type="lastName"
+                type="lastname"
                 styles="w-full"
-                register={register("lastName", {
+                register={register("lastname", {
                   required: "Last Name do no match",
                 })}
-                error={errors.lastName ? errors.lastName?.message : ""}
+                error={errors.lastname ? errors.lastname?.message : ""}
               />
             </div>
 
@@ -182,7 +200,7 @@ const Register = () => {
 
           <div className="mt-16 text-center">
             <p className="text-white text-base">
-              Connect with friedns & have share for fun
+              Connect with friends & have share for fun
             </p>
             <span className="text-sm text-white/80">
               Share memories with friends and the world.

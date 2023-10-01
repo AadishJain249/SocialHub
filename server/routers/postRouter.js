@@ -12,7 +12,7 @@ router.post('/:id',verifyToken,userParticularPost)
 router.post('/get-user-post/:id',verifyToken,getUserPosts)
 
 // comments
-router.get('/get-comments/:postId',verifyToken,getComments)
+router.get('/get-comments/:postId',getComments)
 
 // like post
 router.post("/like/:id",verifyToken,likePost)

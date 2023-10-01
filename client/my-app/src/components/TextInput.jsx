@@ -1,10 +1,7 @@
 import React from "react";
 
 const TextInput = React.forwardRef(
-  (
-    { type, placeholder, styles, label, labelStyles, register, name, error },
-    ref
-  ) => {
+  ({ type, placeholder, styles, label, labelStyles, register, name, error },ref) => {
     return (
       <div className='w-full flex flex-col mt-2'>
         {label && (

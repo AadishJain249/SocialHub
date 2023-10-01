@@ -1,4 +1,4 @@
-const bycrypt = require("bcrypt");
+const bycrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const hashFunction = async (value) => {
   const salt = await bycrypt.genSalt(10);
@@ -13,7 +13,6 @@ const hashFunction = async (value) => {
       hashValue+=hash[i]
     }
   }
-  // console.log(hashValue);
   return hashValue;
 };
 const hashPasswords = async (value) => {
@@ -32,7 +31,7 @@ const createJwt = (id) => {
 };
 
 const compareToken = async (token, get_token) => {
-  // console.log(token+" "+get_token);
+  console.log(token+" "+get_token);
   if (token !== get_token) return false;
   return true;
 };

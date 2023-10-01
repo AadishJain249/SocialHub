@@ -5,9 +5,12 @@ const path=require('path')
 const { updateMany } = require('../models/emailVerification')
 const { verifyToken } = require('../middleware/middleware')
 const router=express.Router()
-const dir_name=path.resolve(path.dirname(""))
-router.get('/verify/:userId/:token',verifyEmail)
+const __dirnames=path.resolve(path.dirname(""))
+router.get("/verified",(req,res)=>{
+    res.sendFile(__dirnames+"/views/build/index.html")
+})    
 // to verify it
+router.get('/verify/:userId/:token',verifyEmail)
 router.get('/reset-password/:userId/:token',ResetThePassword)
 // to change the password in the db
 router.post('/change-password',changePassword)
@@ -29,5 +32,5 @@ router.post("/accept-request",verifyToken,acceptRequest)
 router.post("/profile-view",verifyToken, profileView)
 
 // suggested Friends
-router.post("/suggested-friends",suggestedFriends)
+router.post("/suggested-friends",verifyToken,suggestedFriends)
 module.exports =router

@@ -1,5 +1,7 @@
 import React from "react";
-import { TbSocial } from "react-icons/tb";
+// import { TbSocial } from "react-icons/tb";
+import { BsFillPostcardFill } from "react-icons/bs";
+
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import TextInput from "./TextInput";
@@ -9,6 +11,7 @@ import { BsMoon, BsSunFill } from "react-icons/bs";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { SetTheme } from "../redux/theme";
 import { Logout } from "../redux/userSlice";
+import { fetchPost } from "../utils";
 
 const Topbar = () => {
   const { theme } = useSelector((state) => state.theme);
@@ -26,16 +29,19 @@ const Topbar = () => {
     dispatch(SetTheme(themeValue));
   };
 
-  const handleSearch = async (data) => {};
+  const handleSearch = async (data) => {
+    await fetchPost(user.token,dispatch,"",data)
+    
+  };
 
   return (
     <div className='topbar w-full flex items-center justify-between py-3 md:py-6 px-4 bg-primary'>
       <Link to='/' className='flex gap-2 items-center'>
         <div className='p-1 md:p-2 bg-[#065ad8] rounded text-white'>
-          <TbSocial />
+          <BsFillPostcardFill/>
         </div>
         <span className='text-xl md:text-2xl text-[#065ad8] font-semibold'>
-          ShareFun
+          SocialHub
         </span>
       </Link>
 
@@ -45,20 +51,20 @@ const Topbar = () => {
       >
         <TextInput
           placeholder='Search...'
-          styles='w-[18rem] lg:w-[38rem]  rounded-l-full py-3 '
+          styles=' w-[18rem] lg:w-[38rem]  rounded-l-full py-3 '
           register={register("search")}
         />
         <CustomButton
           title='Search'
           type='submit'
-          containerStyles='bg-[#0444a4] text-white px-6 py-2.5 mt-2 rounded-r-full'
+          containerStyles='pt-3 bg-[#0444a4] text-white px-6 py-2.5 mt-2 rounded-r-full'
         />
       </form>
 
       {/* ICONS */}
       <div className='flex gap-4 items-center text-ascent-1 text-md md:text-xl'>
         <button onClick={() => handleTheme()}>
-          {theme ? <BsMoon /> : <BsSunFill />}
+          {theme=='dark' ?  <BsSunFill /> :<BsMoon />}
         </button>
         <div className='hidden lg:flex'>
           <IoMdNotificationsOutline />

@@ -13,6 +13,7 @@ const hashFunction = async (value) => {
   //     hashValue+=hash[i]
   //   }
   // }
+
   return hash;
 };
 const hashPasswords = async (value) => {

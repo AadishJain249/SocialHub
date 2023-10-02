@@ -145,6 +145,7 @@ const changePassword = async (req, res) => {
   try {
     const { userId, password } = req.body;
     console.log(req.body);
+    console.log(password);
     const hashPassword = await hashFunction(password);
     const user = await Users.findByIdAndUpdate(
       {

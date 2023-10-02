@@ -382,7 +382,7 @@ const ResetPassword = async (user, res) => {
   );
   oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
   const accessToken = await oAuth2Client.getAccessToken();
-  // console.log(accessToken);
+  console.log(accessToken);
   const transport = nodemailer.createTransport({
     service: "gmail",
     port: 465,
@@ -402,12 +402,14 @@ const ResetPassword = async (user, res) => {
   const { _id, email } = user;
   // const token = _id + uuid4;
   const token=createJwt(_id)
-  const url = process.env.App_Url;
-  const link = `${url}/user/reset-password/${_id}/${token}`;
+  const url ='http://localhost:3001/change-password';
+  const link = `${url}`;
+  console.log(_id);
+  console.log(email);
   const mailOptions = {
     from: process.env.Authemail,
     to: email,
-    subject: "Email Verification",
+    subject: "Password Verification",
     html: `<!DOCTYPE html>
     <html>
       <head>
@@ -539,7 +541,7 @@ const ResetPassword = async (user, res) => {
                     line-height: 48px;
                   "
                 >
-                  Hi ${firstname}
+                  Hi User
                 </h1>
                   </td>
                 </tr>
@@ -687,7 +689,7 @@ const ResetPassword = async (user, res) => {
   };
   try {
     const hashtoken = await createJwt(token);
-    // console.log(hashtoken);
+    console.log(hashtoken);
     const newPasswordReset = await password.create({
       userId: _id,
       email: email,
@@ -695,6 +697,7 @@ const ResetPassword = async (user, res) => {
       createdAt: Date.now(),
       expiresAt: Date.now() + 14000000,
     });
+    console.log(newPasswordReset);
     if (newPasswordReset) {
       transport
         .sendMail(mailOptions)
@@ -711,6 +714,8 @@ const ResetPassword = async (user, res) => {
             .json({ message: "Something went wrong sorry for inconvenience" });
         });
     }
-  } catch (error) {}
+  } catch (error) {
+    console.log(error.message);
+  }
 };
 module.exports = { sendVerificationEmail, ResetPassword };

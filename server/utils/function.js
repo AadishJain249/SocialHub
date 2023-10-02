@@ -4,16 +4,16 @@ const hashFunction = async (value) => {
   const salt = await bycrypt.genSalt(10);
   // console.log(salt);
   const hash = await bycrypt.hash(value, salt);
-  hash.replace('/','3')
-  let hashValue=""
-  for(let i=0;i<hash.length;i++)
-  {
-    if(hash[i]!='/')
-    {
-      hashValue+=hash[i]
-    }
-  }
-  return hashValue;
+  // hash.replace('/','3')
+  // let hashValue=""
+  // for(let i=0;i<hash.length;i++)
+  // {
+  //   if(hash[i]!='/')
+  //   {
+  //     hashValue+=hash[i]
+  //   }
+  // }
+  return hash;
 };
 const hashPasswords = async (value) => {
   const salt = await bycrypt.genSalt(10);
@@ -39,6 +39,7 @@ const comparePassword = async (password, input_password) => {
   console.log(password);
   console.log(input_password);
   const matched = await bycrypt.compare(password, input_password);
+  console.log(matched);
   return matched;
 };
 module.exports = { hashFunction, createJwt, comparePassword, compareToken,hashPasswords };

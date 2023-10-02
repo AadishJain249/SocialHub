@@ -6,6 +6,7 @@ import Login from "./pages/Login.jsx";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register.jsx";
 import ResetPassword from "./pages/ResetPassword";
+import ChangePassword from "./pages/ChangePassword";
 function Layout() {
   const { user } = useSelector((state) => state.user);
   const location = useLocation();
@@ -26,6 +27,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/change-password" element={<ChangePassword />} />
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/profile/:id?" element={<Profile />} />

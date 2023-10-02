@@ -34,14 +34,13 @@ const Login = () => {
         data: data,
         method: "POST",
       });
-      console.log(res);
+      // console.log(res);
       if (res?.success === 'failed') {
         setErrMsg(res);
       } 
       else{
         setErrMsg("");
         const newData={token:res?.token,...res?.user}
-        console.log(newData);
         dispatch(UserLogin(newData))
         nav('/')  
       }

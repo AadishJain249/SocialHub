@@ -8,7 +8,7 @@ const {
 } = require("../utils/function");
 const Users = require("../models/user");
 const { ResetPassword } = require("../utils/sendVerificationEmail");
-const passwordmodel = require("../models/password_reset");
+const password = require("../models/password_reset");
 const request = require("../models/request");
 const verifyEmail = async (req, res) => {
   const { userId, token } = req.params;
@@ -88,20 +88,25 @@ const passwordReset = async (req, res) => {
     const userExist = await Users.findOne({ email });
     // console.log(userExist);
     if (!userExist) {
-      res.status(403).send("Email Doesn't Exist");
+      res.status(403).json({status:"failed",message:"Email Doesn't Exist"});
     }
-    const ExistUser = await passwordmodel.findOne({ email });
-    // console.log(ExistUser);
+    const ExistUser = await password.findOne({ email });
+    console.log("Exist User");
+    console.log(ExistUser);
     if (ExistUser) {
       if (ExistUser.expiresAt > Date.now()) {
         return res
           .status(200)
-          .send("Password Reset Link Has Been Sent To Your Email");
+          .send({status:"pending",message:"Password link has been sent to yoour email"});
       }
-      await passwordmodel.findOneAndDelete({ email });
+      await password.findOneAndDelete({ email });
     }
+    console.log("aadish");
     await ResetPassword(userExist, res); // the details of user whose password need to be reset
-  } catch (error) {}
+    console.log("aadish");
+  } catch (error) {
+    console.log(error.message);
+  }
 };
 const ResetThePassword = async (req, res) => {
   const { userId, token } = req.params;
@@ -111,7 +116,7 @@ const ResetThePassword = async (req, res) => {
       res.status(403).send("User Doesn't Exist.");
     }
     // console.log(userExist);
-    const userPasswordReset = await passwordmodel.findOne({ userId });
+    const userPasswordReset = await password.findOne({ userId });
     // console.log(userPasswordReset);
     if (!userPasswordReset) {
       res.status(403).send("Invalid password reset link.Try Again");
@@ -149,7 +154,8 @@ const changePassword = async (req, res) => {
     );
     console.log(user);
     if (user) {
-      await passwordmodel.findOneAndRemove({ userId });
+      // await password.findByIdAndDelete(userId);
+      // await password.findOneAndRemove({ userId });
       await user.save();
       res.status(200).send("Password Successfully Reset");
       return;

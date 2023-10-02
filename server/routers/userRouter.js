@@ -2,13 +2,13 @@
 const {verifyEmail,passwordReset,ResetThePassword,changePassword,getUser,updateUser,friendRequest,getFriendRequest,acceptRequest,suggestedFriends,profileView}=require('../controller/userController')
 const express=require('express')
 const path=require('path')
-const { updateMany } = require('../models/emailVerification')
+// const { updateMany } = require('../models/emailVerification')
 const { verifyToken } = require('../middleware/middleware')
 const router=express.Router()
 const __dirnames=path.resolve(path.dirname(""))
 router.get("/verified",(req,res)=>{
     res.sendFile(__dirnames+"/views/build/index.html")
-})    
+})
 // to verify it
 router.get('/verify/:userId/:token',verifyEmail)
 router.get('/reset-password/:userId/:token',ResetThePassword)

@@ -18,8 +18,8 @@ import { sendFriendRequest } from "../utils";
 
 const ProfileCard = ({user}) => {
   const { user: data, edit } = useSelector((state) => state.user);
-  console.log(user);
-  console.log("profilecard");
+  // console.log(user);
+  // console.log("profilecard");
   const dispatch = useDispatch();
   // console.log(data);
   // console.log(user._id);
@@ -83,7 +83,6 @@ const ProfileCard = ({user}) => {
             <span className='text-ascent-2'>Who viewed your profile</span>
             <span className='text-ascent-1 text-lg'>{user?.views?.length}</span>
           </div>
-
           <span className='text-base text-blue'>
             {user?.verified ? "Verified Account" : "Not Verified"}
           </span>

@@ -30,7 +30,7 @@ const Register = () => {
         data: data,
         method: "POST",
       });
-      console.log(res);
+      // console.log(res);
       if (res?.status === undefined) {
         setErrMsg(res);
       } else {

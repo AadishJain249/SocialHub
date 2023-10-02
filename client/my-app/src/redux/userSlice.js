@@ -22,8 +22,8 @@ const userSlice = createSlice({
 });
 export default userSlice.reducer;
 
-export function UserLogin(user) {
-  console.log(user);
+  export function UserLogin(user) {
+    console.log(user);
   
   return (dispatch, getState) => {
     dispatch(userSlice.actions.login(user));

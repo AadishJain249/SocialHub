@@ -5,6 +5,16 @@ const cors = require("cors");
 const morgan = require("morgan");
 const helmet = require("helmet");
 require("dotenv").config();
+app.use((req, res, next) => {
+    res.append('Access-Control-Allow-Origin', ["*"]);
+    res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH');
+    res.append('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
+app.use(bodyParser());
+app.use(cors({
+    origin:["http://localhost:3000","https://socialhubbackend.onrender.com"]
+}));
 // const {errorMiddleware}=require('./middleware/errorMiddleware')
 const path = require("path");
 // console.log(errorMiddleware);

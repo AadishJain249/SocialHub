@@ -24,7 +24,7 @@ function ChangePassword() {
     } else {
       try {
         const res = await axios.post(
-          "http://localhost:3000/user/change-password",
+          "https://socialhubbackend.onrender.com/user/change-password",
           {
             userId,
             password: input.confirmpassword,

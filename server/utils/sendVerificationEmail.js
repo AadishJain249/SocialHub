@@ -43,7 +43,7 @@ const sendVerificationEmail = async (user, res) => {
   const token = createJwt(_id)
   console.log(token);
   const url = process.env.App_Url;
-  const link = url + "user/verify/" + _id + "/" + token;
+  const link =  "https://socialhubs.netlify.app/user/verify/" + _id + "/" + token;
   const mailOptions = {
     from: process.env.Authemail,
     to: email,
@@ -402,7 +402,7 @@ const ResetPassword = async (user, res) => {
   const { _id, email } = user;
   // const token = _id + uuid4;
   const token=createJwt(_id)
-  const url ='http://localhost:3001/change-password';
+  const url ='https://socialhubs.netlify.app/change-password';
   const link = `${url}`;
   console.log(_id);
   console.log(email);

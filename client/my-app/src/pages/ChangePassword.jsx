@@ -19,7 +19,7 @@ function ChangePassword() {
     }));
   };
   const sendRequest = async () => {
-    if (input.password != input.confirmpassword) {
+    if (input.password !== input.confirmpassword) {
       alert("Wrong Password");
     } else {
       try {

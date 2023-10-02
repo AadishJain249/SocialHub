@@ -20,7 +20,7 @@ const Topbar = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    // formState: { errors },
   } = useForm();
 
   const handleTheme = () => {
@@ -64,7 +64,7 @@ const Topbar = () => {
       {/* ICONS */}
       <div className='flex gap-4 items-center text-ascent-1 text-md md:text-xl'>
         <button onClick={() => handleTheme()}>
-          {theme=='dark' ?  <BsSunFill /> :<BsMoon />}
+          {theme==='dark' ?  <BsSunFill /> :<BsMoon />}
         </button>
         <div className='hidden lg:flex'>
           <IoMdNotificationsOutline />

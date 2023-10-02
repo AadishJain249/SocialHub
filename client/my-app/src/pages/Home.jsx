@@ -93,11 +93,11 @@ const Home = () => {
     }
   }
   const getUser=async()=>{
-    const res=await getUserInfo(user?.token)
+    const res=await getUserInfo(user?.token,user?._id)
     const newData={token:user?.token,...res}
-    // console.log(res);
-    // console.log(newData);
-    // dispatch(UserLogin(newData))
+    console.log(res);
+    console.log(newData);
+    dispatch(UserLogin(newData))
   }
   useEffect(()=>{
     setLoading(true)
@@ -158,8 +158,8 @@ const Home = () => {
             >
               <div className='w-full flex items-center gap-2 py-4 border-b border-[#66666645]'>
                 <img
-                  src={user?.profileUrl}
-                  alt={NoProfile}
+                  src={user?.profileUrl??NoProfile}
+                  alt="User"
                   className='w-14 h-14 rounded-full object-cover'
                 />
                 <TextInput

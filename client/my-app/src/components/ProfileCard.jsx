@@ -17,7 +17,7 @@ import { UpdateProfile } from "../redux/userSlice";
 import { sendFriendRequest } from "../utils";
 
 const ProfileCard = ({user}) => {
-  const { user: data, edit } = useSelector((state) => state.user);
+  const { user: data } = useSelector((state) => state.user);
   // console.log(user);
   // console.log("profilecard");
   const dispatch = useDispatch();

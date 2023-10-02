@@ -42,8 +42,9 @@ const sendVerificationEmail = async (user, res) => {
   // console.log(_id+" "+email);
   const token = createJwt(_id)
   console.log(token);
-  const url = process.env.App_Url;
-  const link =  "https://socialhubs.netlify.app/user/verify/" + _id + "/" + token;
+  // const url = process.env.App_Url;
+  const link =  `http://localhost:3000/user/verify/${_id}/${token}`;
+  console.log(link);
   const mailOptions = {
     from: process.env.Authemail,
     to: email,

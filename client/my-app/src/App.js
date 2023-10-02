@@ -7,17 +7,18 @@ import Profile from "./pages/Profile";
 import Register from "./pages/Register.jsx";
 import ResetPassword from "./pages/ResetPassword";
 import ChangePassword from "./pages/ChangePassword";
+import { useNavigate } from "react-router-dom";
 function Layout() {
   const { user } = useSelector((state) => state.user);
   const location = useLocation();
+  const nav=useNavigate()
 
   return user?.token ? (
     <Outlet />
   ) : (
-    <Navigate to="/login" state={{ from: location }} replace />
+    nav('/login')
   );
 }
-
 function App() {
   const { theme } = useSelector((state) => state.theme);
 

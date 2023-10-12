@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+// import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import { BsFillPostcardFill } from "react-icons/bs";
 import { BsShare } from "react-icons/bs";
@@ -21,7 +21,7 @@ const Register = () => {
   } = useForm({ mode: "onChange" });
   const [errMsg, setErrMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
@@ -127,7 +127,7 @@ const Register = () => {
                   validate: (value) => {
                     const { password } = getValues();
 
-                    if (password != value) {
+                    if (password !== value) {
                       return "Passwords do no match";
                     }
                   },
@@ -143,7 +143,7 @@ const Register = () => {
             {errMsg?.message && (
               <span
                 className={`text-sm ${
-                  errMsg?.status == "failed"
+                  errMsg?.status === "failed"
                     ? "text-[#f64949fe]"
                     : "text-[#2ba150fe]"
                 } mt-0.5`}
@@ -176,7 +176,7 @@ const Register = () => {
         {/* RIGHT */}
         <div className="hidden w-1/2 h-full lg:flex flex-col items-center justify-center bg-blue">
           <div className="relative w-full flex items-center justify-center">
-            <img
+            <image
               src={BgImage}
               alt="Bg Image"
               className="w-48 2xl:w-64 h-48 2xl:h-64 rounded-full object-cover"

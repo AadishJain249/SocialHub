@@ -1,6 +1,6 @@
 import axios from "axios";
 import { SetPosts } from "../redux/postSlice";
-const api_url = "http://localhost:3000";
+const api_url = "https://socialhubbackend.onrender.com";
 const api = axios.create({
   baseURL: api_url,
   responseType: "json",

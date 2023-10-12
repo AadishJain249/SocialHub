@@ -95,8 +95,8 @@ const Home = () => {
   const getUser=async()=>{
     const res=await getUserInfo(user?.token,user?._id)
     const newData={token:user?.token,...res}
-    console.log(res);
-    console.log(newData);
+    // console.log(res);
+    // console.log(newData);
     dispatch(UserLogin(newData))
   }
   useEffect(()=>{

@@ -21,11 +21,8 @@ const verifyEmail = async (req, res) => {
       console.log(data);
       const { expiresAt, token: hashedToken } = data;
       if (expiresAt < Date.now()) {
-        verify
-          .findOneAndDelete({ userId })
-          .then(() => {
-            Users.findOneAndDelete({ _id: userId })
-              .then(() => {
+        verify.findOneAndDelete({ userId }).then(() => {
+            Users.findOneAndDelete({ _id: userId }).then(() => {
                 const message = "Verification Token Has Expired";
                 console.log("aadish1");
                 res.redirect(`/user/verified?status=error&message=${message}`);

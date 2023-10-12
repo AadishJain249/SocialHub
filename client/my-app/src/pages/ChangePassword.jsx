@@ -34,7 +34,9 @@ function ChangePassword() {
         alert("Password updated Successfully");
         console.log(data);
         nav("/login");
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
   const handleSubmit = (e) => {
@@ -107,7 +109,7 @@ function ChangePassword() {
                     I accept the{" "}
                     <a
                       class="font-medium text-primary-600 hover:underline dark:text-primary-500"
-                      href="#"
+                      href="/"
                     >
                       Terms and Conditions
                     </a>

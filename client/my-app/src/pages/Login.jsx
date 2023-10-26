@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import { BsFillPostcardFill } from "react-icons/bs";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { BsShare } from "react-icons/bs";
 import { toast, ToastContainer } from "react-toastify";
@@ -28,10 +28,6 @@ const Login = () => {
   const [errMsg, setErrMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
-  // const theme={
-  //   width:"50px",
-  //   height:"50px",
-  // }
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
@@ -40,7 +36,7 @@ const Login = () => {
         data: data,
         method: "POST",
       });
-      console.log(data);
+      // console.log(data);
       if (res?.success === "failed") {
         setErrMsg(res);
       } else {
@@ -137,16 +133,12 @@ const Login = () => {
             )}
             <br></br>
 
-            {isSubmitting ? (
-              <Loading />
-            ) : (
-              <CustomButton
-                type="submit"
-                onClick={handleClick2}
-                containerStyles={`inline-flex justify-center rounded-md bg-blue px-8 py-3 text-sm font-medium text-white outline-none`}
-                title="Dummy Data"
-              />
-            )}
+            <CustomButton
+              type="submit"
+              onClick={handleClick2}
+              containerStyles={`inline-flex justify-center rounded-md bg-blue px-8 py-3 text-sm font-medium text-white outline-none`}
+              title="Dummy Data"
+            />
           </form>
 
           <p className="text-ascent-2 text-sm text-center">
@@ -162,21 +154,21 @@ const Login = () => {
         {/* RIGHT */}
         <div className="hidden w-1/2 h-full lg:flex flex-col items-center justify-center bg-blue">
           <div>
-          <ToastContainer
-            position="top-left"
-            autoClose={20000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="dark"
-          />
+            <ToastContainer
+              position="top-left"
+              autoClose={20000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="dark"
+            />
           </div>
           <div className="relative w-full flex items-center justify-center">
-            <image
+            <img
               src={BgImage}
               alt="Bg Image"
               className="w-48 2xl:w-64 h-48 2xl:h-64 rounded-full object-cover"

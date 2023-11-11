@@ -1,6 +1,6 @@
 import axios from "axios";
 import { SetPosts } from "../redux/postSlice";
-const api_url = "https://socialhubbackend.onrender.com";
+const api_url = "http://localhost:3000";
 const api = axios.create({
   baseURL: api_url,
   responseType: "json",
@@ -69,7 +69,6 @@ export const deletePost=async(id,token)=>{
             token:token,
             method:"DELETE"
         })
-        console.log(res);
         return 
     } catch (error) {
         console.log(error);
@@ -78,7 +77,6 @@ export const deletePost=async(id,token)=>{
 export const getUserInfo=async(token,id)=>{
     try {
         const uri=id===undefined?"/user/get-user":"/user/get-user/"+id
-        // console.log(uri);
         const res=await apiRequest({
             url:uri,
             token:token,
@@ -97,7 +95,6 @@ export const getUserInfo=async(token,id)=>{
     }
 }
 export const sendFriendRequest=async(token,id)=>{
-    // console.log("aadish");
     try {
         const res=await apiRequest({
             url:"/user/friend-request",
@@ -105,7 +102,6 @@ export const sendFriendRequest=async(token,id)=>{
             method:"POST",
             data:{requestTo:id}
         })
-        console.log(res);
         return
     } catch (error) {
         console.log(error);
@@ -119,7 +115,6 @@ export const viewProfile=async(token,id)=>{
             method:"POST",
             data:{id}
         })
-        console.log(res);
         return
     } catch (error) {
         console.log(error);

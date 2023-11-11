@@ -16,17 +16,14 @@ const ResetPassword = () => {
   } = useForm({
     mode: "onChange",
   });
-  console.log("aaadish");
   const HandleResetSubmit = async (data) => {
     setIsSubmitting(true);
-    console.log(data);
     try {
       const res = await apiRequest({
         url: "/user/new-password",
         data: data,
         method: "POST",
       });
-      console.log(res);
       if (res?.status === "failed") {
         setErrMsg(res);
       } else {

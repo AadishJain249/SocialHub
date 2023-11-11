@@ -18,11 +18,7 @@ import { sendFriendRequest } from "../utils";
 
 const ProfileCard = ({user}) => {
   const { user: data } = useSelector((state) => state.user);
-  // console.log(user);
-  // console.log("profilecard");
   const dispatch = useDispatch();
-  // console.log(data);
-  // console.log(user._id);
   return (
     <div>
       <div className='w-full bg-primary flex flex-col items-center shadow-sm rounded-xl px-6 py-4 '>

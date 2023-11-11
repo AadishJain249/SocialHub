@@ -51,7 +51,6 @@ const Home = () => {
         token:user?.token,
         method:"POST"
       })
-      // console.log("adsfnsdfjsdnjfn");
       setFriendRequest(res?.data)
     } catch (error) {
       console.log(error);
@@ -64,7 +63,6 @@ const Home = () => {
         token:user?.token,
         method:"POST"
       })
-      // console.log(res);
       setSuggestedFriends(res?.data)
     } catch (error) {
       console.log(error);
@@ -95,8 +93,6 @@ const Home = () => {
   const getUser=async()=>{
     const res=await getUserInfo(user?.token,user?._id)
     const newData={token:user?.token,...res}
-    // console.log(res);
-    // console.log(newData);
     dispatch(UserLogin(newData))
   }
   useEffect(()=>{

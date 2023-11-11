@@ -34,7 +34,6 @@ const register = async (req, res, next) => {
     sendVerificationEmail(users, res);
   } catch (error) {
     console.log(error);
-    // console.log("aadish");
     res.status(500).send(error.message);
   }
 };
@@ -61,7 +60,6 @@ const login = async (req, res, next) => {
       })
       return;
     }
-    // console.log(user);
     if (!user.verified) {
       res.status(200).json({
         success:"failed",
@@ -70,8 +68,6 @@ const login = async (req, res, next) => {
       return;
     }
     // now compare password
-    console.log(password);
-    console.log(user?.password);
     const match = await comparePassword(password, user?.password);
     if (!match) {
       res.status(200).json({

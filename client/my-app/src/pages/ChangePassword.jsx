@@ -5,9 +5,7 @@ import { useSelector } from "react-redux";
 function ChangePassword() {
   const nav = useNavigate();
   const { user } = useSelector((state) => state.user);
-  console.log(user);
   const userId = user?._id;
-  console.log(userId);
   const [input, setInput] = useState({
     password: "",
     confirmpassword: "",
@@ -24,7 +22,7 @@ function ChangePassword() {
     } else {
       try {
         const res = await axios.post(
-          "https://socialhubbackend.onrender.com/user/change-password",
+          "http://localhost:3000/user/change-password",
           {
             userId,
             password: input.confirmpassword,
@@ -32,7 +30,7 @@ function ChangePassword() {
         );
         const data = await res.data;
         alert("Password updated Successfully");
-        console.log(data);
+        // console.log(data);
         nav("/login");
       } catch (error) {
         console.log(error);
@@ -41,7 +39,6 @@ function ChangePassword() {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-    // console.log("aadishg");
     sendRequest().then();
   };
   return (

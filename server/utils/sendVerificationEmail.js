@@ -19,7 +19,6 @@ const sendVerificationEmail = async (user, res) => {
   );
   oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
   const accessToken = await oAuth2Client.getAccessToken();
-  // console.log(accessToken);
   const transport = nodemailer.createTransport({
     service: "gmail",
     port: 465,
@@ -36,15 +35,10 @@ const sendVerificationEmail = async (user, res) => {
       rejectUnauthorized: false,
     },
   });
-  // console.log(user);
-  // console.log("aadish");
   const { _id, email, firstname } = user;
-  // console.log(_id+" "+email);
   const token = createJwt(_id)
-  console.log(token);
-  // const url = process.env.App_Url;
+  const url = process.env.App_Url;
   const link =  `http://localhost:3000/user/verify/${_id}/${token}`;
-  console.log(link);
   const mailOptions = {
     from: process.env.Authemail,
     to: email,
@@ -340,16 +334,13 @@ const sendVerificationEmail = async (user, res) => {
   };
   try {
     const hashtoken = await createJwt(_id);
-    // console.log(hashtoken);
     const newVerifiedEmail = await verify.create({
       userId: _id,
       token: hashtoken,
       createdAt: Date.now(),
       expiresAt: Date.now() + 14000000,
     });
-    // console.log(newVerifiedEmail);
     if (newVerifiedEmail) {
-      // console.log(transport);
       transport
         .sendMail(mailOptions)
         .then(() => {
@@ -360,7 +351,6 @@ const sendVerificationEmail = async (user, res) => {
           });
         })
         .catch((e) => {
-          // console.log(e);
           res.status(404).json({ message: "Something Went Wrong" });
         });
     }
@@ -383,7 +373,6 @@ const ResetPassword = async (user, res) => {
   );
   oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
   const accessToken = await oAuth2Client.getAccessToken();
-  console.log(accessToken);
   const transport = nodemailer.createTransport({
     service: "gmail",
     port: 465,
@@ -401,12 +390,10 @@ const ResetPassword = async (user, res) => {
     },
   });
   const { _id, email } = user;
-  // const token = _id + uuid4;
   const token=createJwt(_id)
-  const url ='https://socialhubs.netlify.app/change-password';
+  const url ='http://localhost:3001/change-password';
   const link = `${url}`;
-  console.log(_id);
-  console.log(email);
+
   const mailOptions = {
     from: process.env.Authemail,
     to: email,
@@ -690,7 +677,6 @@ const ResetPassword = async (user, res) => {
   };
   try {
     const hashtoken = await createJwt(token);
-    console.log(hashtoken);
     const newPasswordReset = await password.create({
       userId: _id,
       email: email,
@@ -698,7 +684,6 @@ const ResetPassword = async (user, res) => {
       createdAt: Date.now(),
       expiresAt: Date.now() + 14000000,
     });
-    console.log(newPasswordReset);
     if (newPasswordReset) {
       transport
         .sendMail(mailOptions)

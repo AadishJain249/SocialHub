@@ -10,7 +10,8 @@ import { useNavigate } from "react-router-dom";
 function Layout() {
   const { user } = useSelector((state) => state.user);
   const nav=useNavigate()
-  return user?.token ? (
+  console.log(user);
+  return user? (
     <Outlet />
   ) : (
     nav('/login')

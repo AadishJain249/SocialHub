@@ -12,23 +12,17 @@ const password = require("../models/password_reset");
 const request = require("../models/request");
 const verifyEmail = async (req, res) => {
   const { userId, token } = req.params;
-  console.log(userId + "yess");
-  console.log(token + "verify");
   try {
     const data = await verify.findOne({ userId });
-    console.log(data);
     if (data) {
-      console.log(data);
       const { expiresAt, token: hashedToken } = data;
       if (expiresAt < Date.now()) {
         verify.findOneAndDelete({ userId }).then(() => {
             Users.findOneAndDelete({ _id: userId }).then(() => {
                 const message = "Verification Token Has Expired";
-                console.log("aadish1");
                 res.redirect(`/user/verified?status=error&message=${message}`);
               })
               .catch((e) => {
-                console.log("aadish12");
                 res.redirect(`/user/verified?message=`);
               });
           })
@@ -36,32 +30,26 @@ const verifyEmail = async (req, res) => {
             res.redirect(`/user/verified?message=`);
           });
       } else {
-        console.log("aadishisgood");
         compareToken(token, hashedToken)
           .then((matched) => {
-            console.log(matched);
             if (matched) {
               Users.findByIdAndUpdate({ _id: userId }, { verified: true })
                 .then(() => {
                   verify.findOneAndDelete({ userId }).then(() => {
                     const message = "Email Verified Succesfully";
-                    console.log("aadish2");
                     res.redirect(
                       `/user/verified?status=success&message=${message}`
                     );
                   });
                 })
                 .catch((e) => {
-                  console.log(e);
                   const message = "Verification Failed or link is expired";
-                  console.log("aadish3");
                   res.redirect(
                     `/user/verified?status=error&message=${message}`
                   );
                 });
             } else {
               const message = "Verification Failed or link is expired";
-              console.log("aadish4");
               res.redirect(`/user/verified?status=error&message=${message}`);
             }
           })
@@ -83,13 +71,11 @@ const passwordReset = async (req, res) => {
   try {
     const { email } = req.body;
     const userExist = await Users.findOne({ email });
-    // console.log(userExist);
     if (!userExist) {
       res.status(403).json({status:"failed",message:"Email Doesn't Exist"});
     }
     const ExistUser = await password.findOne({ email });
     console.log("Exist User");
-    console.log(ExistUser);
     if (ExistUser) {
       if (ExistUser.expiresAt > Date.now()) {
         return res
@@ -98,9 +84,7 @@ const passwordReset = async (req, res) => {
       }
       await password.findOneAndDelete({ email });
     }
-    console.log("aadish");
     await ResetPassword(userExist, res); // the details of user whose password need to be reset
-    console.log("aadish");
   } catch (error) {
     console.log(error.message);
   }
@@ -112,22 +96,16 @@ const ResetThePassword = async (req, res) => {
     if (!userExist) {
       res.status(403).send("User Doesn't Exist.");
     }
-    // console.log(userExist);
     const userPasswordReset = await password.findOne({ userId });
-    // console.log(userPasswordReset);
     if (!userPasswordReset) {
       res.status(403).send("Invalid password reset link.Try Again");
     }
     const { expiresAt, token: resetToken } = userPasswordReset;
-    // console.log(userPasswordReset+" "+"aadish");
     if (expiresAt < Date.now()) {
-      // console.log("aa");
       res.status(403).send("Password reset link has been expired");
     } else {
-      // console.log(token);
       const isMatch = await compareToken(token, resetToken);
       if (!isMatch) {
-        // console.log("aad");
         res.status(403).send("Invalid password reset link.Try Again");
       } else {
         res.status(200).send("All done");
@@ -141,8 +119,6 @@ const ResetThePassword = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     const { userId, password } = req.body;
-    console.log(req.body);
-    console.log(password);
     const hashPassword = await hashFunction(password);
     const user = await Users.findByIdAndUpdate(
       {
@@ -150,7 +126,6 @@ const changePassword = async (req, res) => {
       },
       { password: hashPassword }
     );
-    console.log(user);
     if (user) {
       // await password.findByIdAndDelete(userId);
       // await password.findOneAndRemove({ userId });
@@ -166,9 +141,6 @@ const changePassword = async (req, res) => {
 const getUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    // console.log(id);
-    // console.log(req.body.user);
-    // const { userId } = req.body.user;
     const user = await Users.findById(id).populate({
       path: "friends",
       select: "-password",
@@ -207,7 +179,6 @@ const updateUser = async (req, res, next) => {
     const user = await Users.findByIdAndUpdate(userId, updateUser, {
       new: true,
     });
-    console.log(user);
     await user.populate({ path: "friends", select: " -password" });
     const token = createJwt(user?._id);
     user.password = undefined;
@@ -226,14 +197,11 @@ const friendRequest = async (req, res, next) => {
   try {
     const { userId } = req.body.user;
     const { requestTo } = req.body;
-    // console.log(userId);
-    // console.log(id);
     // if we  have has sent a request
     const requestExist = await request.findOne({
       requestFrom: userId,
       requestTo,
     });
-    // console.log(requestExist);
     if (requestExist) {
       return res.status(200).send("Friend Request Already Been Sent");
     }
@@ -249,7 +217,6 @@ const friendRequest = async (req, res, next) => {
       requestTo,
       requestFrom: userId,
     });
-    // console.log(newRequest);
     await newRequest.save();
     res.status(201).json({
       success: true,
@@ -263,7 +230,6 @@ const friendRequest = async (req, res, next) => {
 const getFriendRequest = async (req, res, next) => {
   try {
     const { userId } = req.body.user;
-    // console.log(userId);
     // it will get the all person pending request populate who has sent this request
     const checkRequest = await request
       .find({
@@ -276,7 +242,6 @@ const getFriendRequest = async (req, res, next) => {
       })
       .limit(10)
       .sort({ _id: -1 });
-    // console.log(checkRequest);
     res.status(200).json({
       success: true,
       data: checkRequest,
@@ -289,12 +254,8 @@ const getFriendRequest = async (req, res, next) => {
 const acceptRequest = async (req, res, next) => {
   try {
     const userId = req.body.user.userId;
-    // console.log(userId); // request to
-    // console.log(id);
     const { rid, status } = req.body; // request from
-    // console.log(rid); // rid that person data id we need to fetch
     const requestExist = await request.findById(rid);
-    // console.log(requestExist);
     if (!requestExist) {
       return res.status(200).send("No Request Exist");
     }
@@ -304,12 +265,9 @@ const acceptRequest = async (req, res, next) => {
       },
       { requestStatus: status }
     );
-    console.log(newRes);
     if (status === "Accepted") {
       const user = await Users.findById(userId);
-      // console.log(user);
       user.friends.push(newRes?.requestFrom);
-      // console.log(user);
       await user.save();
       const friend = await Users.findById(newRes?.requestFrom);
       friend.friends.push(newRes?.requestTo);
@@ -350,7 +308,6 @@ const suggestedFriends = async (req, res, next) => {
       })
       .select('-password')
       .limit(6);
-    console.log(people);
     res.status(200).json({ success: true, data: people });
   } catch (error) {
     console.log(error.message);

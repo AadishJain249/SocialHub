@@ -10,7 +10,6 @@ import { apiRequest, handleFileUpload } from "../utils";
 
 const EditProfile = () => {
   const { user } = useSelector((state) => state.user);
-  // console.log(user);
   const dispatch = useDispatch();
   const [errMsg, setErrMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,13 +25,10 @@ const EditProfile = () => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    // console.log("aadish");
     setErrMsg("");
     try {
       const uri = picture && (await handleFileUpload(picture));
-      // console.log(uri);
       const { firstname, lastname, location, profession } = data;
-      // console.log(data);
       const res = await apiRequest({
         url: "/user/update-user",
         data: {
@@ -50,8 +46,6 @@ const EditProfile = () => {
       } else {
         setErrMsg(res)
         const newUser={token:res?.token,...res?.user};
-        // console.log(newUser);
-        // console.log("aadish is luffy");
         dispatch(UserLogin(newUser))
         setTimeout(()=>{
           dispatch(UpdateProfile(false))

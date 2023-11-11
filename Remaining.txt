@@ -1,2 +1,0 @@
-reset-password
-viewed-profile
